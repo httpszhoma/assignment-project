@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Confirmation</title>
+</head>
+<body>
+    <h2>Ticket Confirmation</h2>
+    <p>Dear {{ user.username }},</p>
+    <p>Thank you for your purchase. Here are your ticket details:</p>
+    <ul>
+        {% for ticket in tickets %}
+        <li>
+            <strong>Show:</strong> {{ ticket.spectacle.title }}<br>
+            <strong>Date:</strong> {{ ticket.spectacle.date_passing }}<br>
+            <strong>Time:</strong> {{ ticket.spectacle.time_passing }}<br>
+            <strong>Seat:</strong> Row {{ ticket.seat.row }}, Seat {{ ticket.seat.number }}<br>
+            <strong>Price:</strong> {{ ticket.price }} ₸<br>
+            <img src="{{ ticket.qr_code.url }}" alt="QR Code" style="max-width: 100px;">
+        </li>
+        {% endfor %}
+    </ul>
+    <p>Please find your QR code(s) attached for entry.</p>
+    <p>Enjoy the show!</p>
+</body>
+</html>

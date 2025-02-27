@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block container %}
+    <div class="container-courses">
+        <div class="categories">
+            <h1 style="color: #eaeaea">Kazakh National <br>Opera and Ballet <br>Theater named after Abai</h1>
+        </div>
+        <div class="categories-video">
+            <video src="{% static 'img/opera_abay_almaty.mp4' %}" autoplay muted loop></video>
+        </div>
+    </div>
+
+    <div class="container-cards">
+        <div class="card1">
+            <img src="{% static 'img/drama.jpg' %}" alt="">
+            <h1>Drama</h1>
+            <p>Experience the intensity and emotion of drama.</p>
+            <button class="left-diagonal-button" onclick="window.location.href='drama.html'">Learn More</button>
+        </div>
+        <div class="card2">
+            <img src="{% static 'img/comedy.jpg' %}" alt="">
+            <h1>Comedy</h1>
+            <p>Laugh out loud with our comedy performances.</p>
+            <button class="right-diagonal-button" onclick="window.location.href='comedy.html'">Learn More</button>
+        </div>
+        <div class="card3">
+            <img src="{% static 'img/musical.jpg' %}" alt="">
+            <h1>Musical</h1>
+            <p>Enjoy the vibrant and lively musical shows.</p>
+            <button class="right-diagonal-button" onclick="window.location.href='musical.html'">Learn More</button>
+        </div>
+        <div class="card4">
+            <img src="{% static 'img/classical.jpg' %}" alt="">
+            <h1>Classical</h1>
+            <p>Appreciate the timeless classical performances.</p>
+            <button class="left-diagonal-button" onclick="window.location.href='classical.html'">Learn More</button>
+        </div>
+    </div>
+{% endblock %}

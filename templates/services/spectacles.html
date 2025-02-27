@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block container %}
+    <link rel="stylesheet" href="{% static 'css/spectacles.css' %}">
+    <div class="search-section">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="search-bar" style="width: 900px">
+                <input type="text" name="title" id="search-input" placeholder="Search spectacles by name"
+                       value="{{ search_query }}">
+                <button class="filter-button" onclick="">Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-container" style="width: 60%; margin: 40px auto;">
+        {% for spectacle in spectacles %}
+            <div class="card" data-category="cabaret" data-date="2024-06-30">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="{{ spectacle.image.url }}" alt="MUHA cabaret">
+                        <div class="price">от {{ spectacle.price }} ₸</div>
+                        <div class="age">{{ spectacle.age_limit }}+</div>
+                        <h3>{{ spectacle.title }}</h3>
+                        <p>{{ spectacle.datetime_passing.day }} {{ spectacle.datetime_passing.day|date:"F" }} • Театр ...</p>
+                    </div>
+                    <div class="card-back">
+                        <h3>More Info</h3>
+                        <p>Details about the spectacle...</p>
+                        <button onclick="window.location.href='{% url 'details' spectacle.pk %}'">Buy Ticket</button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const cards = document.querySelectorAll('.card');
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.5
+            });
+
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+
+{% endblock %}

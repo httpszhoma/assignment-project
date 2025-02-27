@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment{% endblock %}
+
+{% block container %}
+    <style>
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-header {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #17a2b8;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            border-radius: 4px;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+
+        .payment-button {
+            background-color: #17a2b8;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .payment-button:hover {
+            background-color: #138f99;
+        }
+
+        .total-price {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #17a2b8;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-method input {
+            margin-right: 10px;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-details input {
+            width: 48%;
+        }
+
+        .card-icons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .card-icons i {
+            font-size: 24px;
+            color: #495057;
+        }
+    </style>
+    <div class="payment-container">
+        <h2 class="payment-header">Great, that's {{ total_price }} ₸!</h2>
+        <form id="payment-form" method="post">
+            {% csrf_token %}
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <input type="radio" id="paypal" name="payment_method" value="paypal">
+                    <label for="paypal">PayPal</label>
+                    <i class="fab fa-paypal"></i>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" id="card" name="payment_method" value="card" checked>
+                    <label for="card">Debit/credit card</label>
+                </div>
+            </div>
+            <div class="card-icons">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+            </div>
+            <div class="form-group">
+                <label for="card_number">Card number</label>
+                {{ form.card_number }}
+            </div>
+            <div class="card-details">
+                <div class="form-group">
+                    <label for="expiry_date">Expiry</label>
+                    {{ form.expiry_date }}
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVC</label>
+                    {{ form.cvv }}
+                </div>
+            </div>
+            <button type="submit" class="payment-button">Finish and pay</button>
+        </form>
+    </div>
+{% endblock %}

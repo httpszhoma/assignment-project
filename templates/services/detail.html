@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block container %}
+
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+    <div class="container" style="width: 80%; height: 900px; background-color: #f0f0f0; padding: 30px; margin-bottom: 20px;border-radius: 15px">
+        <div class="content">
+            <img src="{{ spectacle.image.url }}" alt="Мэйби Бэйби в Алматы">
+            <div style="display: flex;">
+                <div style="width: 100%;">
+                    <h1 style="padding-left: 15px;">{{ spectacle.title }}</h1>
+                    <p style="padding-left: 20px;margin-top: 50px;">Description</p>
+                    <div class="description">
+                        {{ spectacle.description }}
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="#" class="buy-button" id="buy-button" style="margin-left: 15px;">Buy ticket</a>
+                    {% else %}
+                        <p style="color: red; position: relative;top: 50px;left: 25px">To buy a ticket you must be
+                            authenticated</p>
+                    {% endif %}
+                </div>
+                <div class="details">
+                    <div>
+                        <p><strong>Место проведения:<br><br></strong> г. Алматы, ул. Розыбакиева 234, Клуб «Жесть»</p>
+                        <p><strong>Дата:<br><br></strong> {{ spectacle.date_passing }}</p>
+                        <p><strong>Начало:<br><br></strong> {{ spectacle.time_passing }}</p>
+                        <p><strong>Поставщики:<br><br></strong> {{ spectacle.theater_director }}</p>
+                    </div>
+                    <div>
+                        <p><strong>Возрастное ограничение:<br></strong>
+                        <div style="width: 20px; height: 40px; border-radius: 50%; background-color:#e65c00; display: flex; justify-content: center; align-items: center;">
+                            <p style="color: white; font-weight: bold; margin-right: 15px;">{{ spectacle.age_limit }}+</p>
+                        </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="schedule-container">
+            <div style="display: flex; justify-content: center;">
+                <h1>SCHEDULE</h1>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>DATE</th>
+                    <th>ADDRESS</th>
+                    <th>ZONE</th>
+                    <th>PRICE</th>
+                    <th>TIME</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <div class="date">
+                            <span class="day">{{ spectacle.datetime_passing.day }}</span>
+                            <span class="month">{{ spectacle.datetime_passing.date|date:"F" }}</span>
+                            <span class="day-of-week">{{ spectacle.date_passing|date:"D" }}</span>
+                        </div>
+                    </td>
+                    <td>Театр имени Абая</td>
+                    <td>Зрительный зал</td>
+                    <td>от {{ spectacle.price }}</td>
+                    <td>
+                        <div class="time-ticket">
+                            <span class="time">{{ spectacle.datetime_passing.time }}</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="seatModal" class="modal">
+        <div class="modal-content-ticket">
+            <h2 class="modal-header">Выберите билет</h2>
+            <span class="close" id="close" style="position: relative; bottom: 50px">&times;</span>
+            <div style="display:flex; width: 80%">
+                <div class="seat-selection">
+                    <div class="hall-layout">
+                        {% for column in spectacle.hall.columns.all %}
+                            <div class="row">
+                                <span class="row-label">{{ column.number_column }} ряд</span>
+                                {% for seat in column.seats.all %}
+                                    <button class="seat {% if seat.status != 'available' %}occupied{% endif %}"
+                                            data-seat-id="{{ seat.id }}" data-seat-number="{{ seat.number }}"
+                                            data-seat-column="{{ column.number_column }}"
+                                            data-seat-price="{{ spectacle.price }}"
+                                            data-seat-row="{{ column.number_column }}">
+                                        {{ seat.number }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div id="selected-tickets" class="selected-tickets" style="margin-top: 50px"></div>
+
+            </div>
+            <div id="total-sum" class="total-sum"
+                 style="margin-top: 20px; 
+             font-weight: bold; 
+             text-align: right;">
+                Билеты: 0 за 0 ₸
+            </div>
+            <button class="confirm-button" id="confirm-button" data-spectacle-id="{{ spectacle.id }}">Далее</button>
+        </div>
+    </div>
+
+    <script src="{% static 'js/csrf.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('buy-button').addEventListener('click', function () {
+                document.getElementById('seatModal').classList.add('active');
+            });
+
+            document.getElementById('close').addEventListener('click', function () {
+                document.getElementById('seatModal').classList.remove('active');
+            });
+
+            const selectedSeats = [];
+
+            document.querySelectorAll('.seat').forEach(function (seat) {
+                seat.addEventListener('click', function () {
+                    if (!seat.classList.contains('occupied') && !seat.classList.contains('selected')) {
+                        if (selectedSeats.length < 5) {
+                            seat.classList.add('selected');
+                            selectedSeats.push(seat);
+                            updateSelectedTickets();
+                        } else {
+                            alert('You can select a maximum of 5 tickets.');
+                        }
+                    } else if (seat.classList.contains('selected')) {
+                        seat.classList.remove('selected');
+                        const index = selectedSeats.indexOf(seat);
+                        if (index > -1) {
+                            selectedSeats.splice(index, 1);
+                        }
+                        updateSelectedTickets();
+                    }
+                });
+            });
+
+            function updateSelectedTickets() {
+                const selectedTicketsDiv = document.getElementById('selected-tickets');
+                selectedTicketsDiv.innerHTML = '';
+
+                selectedSeats.forEach(function (seat) {
+                    const seatId = seat.getAttribute('data-seat-id');
+                    const seatNumber = seat.getAttribute('data-seat-number');
+                    const seatPrice = seat.getAttribute('data-seat-price');
+                    const seatRow = seat.getAttribute('data-seat-row');
+                    const ticketDiv = document.createElement('div');
+                    ticketDiv.className = 'ticket';
+                    ticketDiv.innerHTML = `
+                <p>Обычные</p>
+                <p>${seatRow} ряд, ${seatNumber} место</p>
+                <p>${seatPrice} ₸</p>
+            `;
+                    selectedTicketsDiv.appendChild(ticketDiv);
+                });
+
+                const totalSumDiv = document.getElementById('total-sum');
+                const totalPrice = selectedSeats.reduce((sum, seat) => sum + parseInt(seat.getAttribute('data-seat-price')), 0);
+                totalSumDiv.innerHTML = `Билеты: ${selectedSeats.length} за ${totalPrice} ₸`;
+            }
+
+            document.getElementById('confirm-button').addEventListener('click', function () {
+                const spectacleId = this.getAttribute('data-spectacle-id');
+                const selectedSeatIds = selectedSeats.map(seat => seat.getAttribute('data-seat-id'));
+                console.log(selectedSeatIds)
+                fetch(`/buy-tickets/${spectacleId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({selected_seats: selectedSeatIds})
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json().catch(() => {
+                            throw new Error('Invalid JSON response');
+                        });
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = '/payment/';
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            });
+        });
+    </script>
+{% endblock %}
