@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "theater"
+version = "0.1.0"
+description = ""
+authors = ["arystambek-dimash <arystambekdimash005@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "^4.0.2"
+pillow = "^10.3.0"
+django-background-tasks = "^1.2.5"
+huey = {extras = ["redis"], version = "^2.5.0"}
+django-rq = "^2.10.2"
+apscheduler = "^3.10.4"
+django-apscheduler = "^0.6.2"
+qrcode = "^7.4.2"
+gunicorn = "^22.0.0"
+whitenoise = "^6.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
