@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from accounts.models import User
 from services.utils import generate_qr_code
+from django.core.files.storage import default_storage
 
 
 class Hall(models.Model):
@@ -50,7 +51,7 @@ class Seat(models.Model):
 
 class Spectacle(models.Model):
     title = models.CharField(max_length=60)
-    image = models.ImageField(upload_to='media/img/spectacles', null=True)
+    image = models.ImageField(null=True, blank=True, storage=default_storage)
     description = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     duration = models.IntegerField(validators=[MinValueValidator(0)])

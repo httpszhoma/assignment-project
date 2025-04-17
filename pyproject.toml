@@ -14,7 +14,7 @@ huey = {extras = ["redis"], version = "^2.5.0"}
 django-rq = "^2.10.2"
 apscheduler = "^3.10.4"
 django-apscheduler = "^0.6.2"
-qrcode = "^7.4.2"
+qrcode = {extras = ["pil"], version = "^8.1"}
 gunicorn = "^22.0.0"
 whitenoise = "^6.6.0"
 
