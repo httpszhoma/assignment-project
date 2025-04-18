@@ -10,3 +10,19 @@ urlpatterns = [
     path('payment/', views.PaymentView.as_view(), name='payment'),
     path('my-tickets/', views.get_my_tickets, name='my_tickets')
 ]
+
+from django.urls import path
+from . import api_views
+
+urlpatterns += [
+    path('api/spectacles/<int:id>/seats/', api_views.get_spectacle_seats, name='api_spectacle_seats'),
+    path('api/tickets/<int:id>/', api_views.ticket_detail, name='api_ticket_detail'),
+    path('api/tickets/', api_views.all_tickets, name='api_all_tickets'),
+    path('api/tickets/create/', api_views.create_ticket, name='api_create_ticket'),
+    path('api/tickets/<int:id>/delete/', api_views.delete_ticket, name='api_delete_ticket'),
+    path('api/seats/<int:id>/update/', api_views.update_seat_status, name='api_update_seat'),
+    path('api/halls/', api_views.all_halls, name='api_all_halls'),
+    path('api/halls/<int:hall_id>/columns/', api_views.hall_columns, name='api_hall_columns'),
+    path('api/users/', api_views.all_users, name='api_all_users'),
+    path('api/spectacles-by-date/', api_views.spectacles_by_date, name='api_spectacles_by_date'),
+]
