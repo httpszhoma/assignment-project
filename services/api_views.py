@@ -30,7 +30,7 @@ def ticket_detail(request, id):
 
 @api_view(['GET'])
 def all_tickets(request):
-    tickets = Ticket.objects.all()
+    tickets = Ticket.objects.select_related('spectacle', 'user').prefetch_related('seat')
     serializer = TicketDetailSerializer(tickets, many=True)
     return Response(serializer.data)
 

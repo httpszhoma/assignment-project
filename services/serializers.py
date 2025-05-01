@@ -124,3 +124,30 @@ class SpectacleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Spectacle
         fields = '__all__'
+
+class TicketGenericSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    seat = serializers.PrimaryKeyRelatedField(queryset=Seat.objects.all())
+    spectacle = serializers.PrimaryKeyRelatedField(queryset=Spectacle.objects.all())
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    qr_code = serializers.ImageField(required=False)
+
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Price must be greater than 0.")
+        return value
+
+    def validate(self, data):
+        if data['seat'].status != 'available':
+            raise serializers.ValidationError("Seat must be available to book a ticket.")
+        return data
+
+    def create(self, validated_data):
+        return Ticket.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

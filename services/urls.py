@@ -13,8 +13,11 @@ urlpatterns = [
 
 from django.urls import path
 from . import api_views
+from django.urls import path, include
 
 urlpatterns += [
+    path('silk/', include('silk.urls', namespace='silk')),
+    path('api/tickets/create/generic', views.create_ticket_generic, name='create_ticket_generic'),
     path('api/spectacles/<int:id>/seats/', api_views.get_spectacle_seats, name='api_spectacle_seats'),
     path('api/tickets/<int:id>/', api_views.ticket_detail, name='api_ticket_detail'),
     path('api/tickets/', api_views.all_tickets, name='api_all_tickets'),

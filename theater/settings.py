@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'accounts',
     'services',
     'rest_framework',
+    'silk',
     'django_extensions',
     'django_apscheduler',
     'storages'
@@ -43,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'theater.urls'
