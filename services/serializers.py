@@ -22,10 +22,33 @@ class SeatUpdateSerializer(serializers.ModelSerializer):
         fields = ['status']
 
 
+
+class SeatNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seat
+        fields = ['id', 'row', 'number', 'status']
+
+
+class SpectacleNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Spectacle
+        fields = ['id', 'title', 'price', 'datetime_passing']
+
 class TicketDetailSerializer(serializers.ModelSerializer):
+    seat = SeatNestedSerializer(read_only=True)
+    spectacle = SpectacleNestedSerializer(read_only=True)
+    seat_display = serializers.SerializerMethodField()
+    spectacle_title = serializers.SerializerMethodField()
+
     class Meta:
         model = Ticket
-        fields = ['id', 'seat', 'spectacle', 'price']
+        fields = ['id', 'seat', 'spectacle', 'price', 'seat_display', 'spectacle_title']
+
+    def get_seat_display(self, obj):
+        return f"{obj.seat.row}-{obj.seat.number}"
+
+    def get_spectacle_title(self, obj):
+        return obj.spectacle.title
 
 
 class TicketCreateSerializer(serializers.ModelSerializer):
