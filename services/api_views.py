@@ -82,3 +82,17 @@ def spectacles_by_date(request):
     spectacles = Spectacle.objects.filter(datetime_passing__date=date)
     serializer = SpectacleSerializer(spectacles, many=True)
     return Response(serializer.data)
+
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from .models import Ticket
+from .serializers import TicketDetailSerializer
+
+
+class TicketListView(ListAPIView):
+    queryset = Ticket.objects.select_related('spectacle', 'user').prefetch_related('seat')
+    serializer_class = TicketDetailSerializer
+
+
+class TicketDetailView(RetrieveAPIView):
+    queryset = Ticket.objects.select_related('spectacle', 'user').prefetch_related('seat')
+    serializer_class = TicketDetailSerializer
