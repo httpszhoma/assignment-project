@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'accounts',
     'services',
     'rest_framework',
+    'django_extensions',
     'django_apscheduler',
     'storages'
 ]

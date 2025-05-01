@@ -5,7 +5,9 @@ from django.db import models
 from accounts.models import User
 from services.utils import generate_qr_code
 from django.core.files.storage import default_storage
+from enum import Enum
 
+from django.utils.timezone import now
 
 class Hall(models.Model):
     number_hall = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(6)])
@@ -29,17 +31,24 @@ class ColumnSeats(models.Model):
     def __str__(self):
         return f"Column {self.number_column} in Hall {self.hall.number_hall}"
 
+class SeatStatus(Enum):
+    AVAILABLE = "available"
+    RESERVED = "reserved"
+    BOOKED = "booked"
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name.capitalize()) for key in cls]
 
 class Seat(models.Model):
-    STATUS_CHOICES = [
-        ('available', 'Available'),
-        ('reserved', 'Reserved'),
-        ('booked', 'Booked')
-    ]
     column = models.ForeignKey(ColumnSeats, on_delete=models.CASCADE, related_name='seats')
     row = models.CharField(max_length=10)
     number = models.PositiveIntegerField()
-    status = models.CharField(max_length=9, choices=STATUS_CHOICES, default='available')
+    status = models.CharField(
+        max_length=9,
+        choices=SeatStatus.choices(),
+        default=SeatStatus.AVAILABLE.value
+    )
 
     class Meta:
         verbose_name = "Seat"
@@ -54,14 +63,26 @@ class Spectacle(models.Model):
     image = models.ImageField(null=True, blank=True, storage=default_storage)
     description = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    duration = models.IntegerField(validators=[MinValueValidator(0)])
+    duration = models.IntegerField(validators=[MinValueValidator(0)])  # in minutes
     datetime_passing = models.DateTimeField()
     theater_director = models.CharField(max_length=125)
     hall = models.OneToOneField(Hall, on_delete=models.DO_NOTHING, related_name='spectacles')
     age_limit = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], default=6)
 
+    class Meta:
+        verbose_name = "Spectacle"
+        verbose_name_plural = "Spectacles"
+
     def __str__(self):
         return f"{self.title}"
+
+    @property
+    def is_upcoming(self):
+        return self.datetime_passing > now()
+
+    @property
+    def ends_at(self):
+        return self.datetime_passing + timedelta(minutes=self.duration)
 
 
 class Ticket(models.Model):
@@ -71,13 +92,6 @@ class Ticket(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if not self.qr_code:
-            qr_code_image = generate_qr_code(
-                f'Ticket for {self.spectacle.title} at seat {self.seat.row} {self.seat.number}')
-            self.qr_code.save(f'qr_code_{self.id}.png', qr_code_image, save=False)
-        super().save(*args, **kwargs)
-
     class Meta:
         verbose_name = "Ticket"
         verbose_name_plural = "Tickets"
@@ -85,3 +99,18 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket for {self.spectacle.title} at {self.seat.row} Seat {self.seat.number}"
+
+    def save(self, *args, **kwargs):
+        if not self.qr_code:
+            qr_code_image = generate_qr_code(
+                f'Ticket for {self.spectacle.title} at seat {self.seat.row} {self.seat.number}')
+            self.qr_code.save(f'qr_code_{self.id or "new"}.png', qr_code_image, save=False)
+        super().save(*args, **kwargs)
+
+    @property
+    def seat_display(self):
+        return f"{self.seat.row}-{self.seat.number}"
+
+    @property
+    def spectacle_title(self):
+        return self.spectacle.title
